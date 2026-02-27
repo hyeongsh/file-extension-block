@@ -1,74 +1,81 @@
 package com.hyeongsh.feb.service;
 
+import com.hyeongsh.feb.domain.Extension;
 import com.hyeongsh.feb.dto.*;
+import com.hyeongsh.feb.enums.ExtensionType;
 import com.hyeongsh.feb.exception.*;
 import com.hyeongsh.feb.repository.FebRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class FebService {
 
-    private final Map<String, Boolean> fixedExtensions;
-    private final Set<String> customExtensions;
-
-    public FebService() {
-        this.fixedExtensions = new HashMap<>();
-        fixedExtensions.put("bat", false);
-        fixedExtensions.put("cmd", false);
-        fixedExtensions.put("com", false);
-        fixedExtensions.put("cpl", false);
-        fixedExtensions.put("exe", false);
-        fixedExtensions.put("scr", false);
-        fixedExtensions.put("js", false);
-        this.customExtensions = new HashSet<>();
-    }
+    private final FebRepository febRepository;
 
     public List<FixedExtensionResponse> getFixedExtensions() {
-        return fixedExtensions
-                .entrySet()
-                .stream()
-                .map(o -> new FixedExtensionResponse(o.getKey(), o.getValue()))
+        List<Extension> extensionsByExtensionType = febRepository.getExtensionsByExtensionType(ExtensionType.FIXED);
+        return extensionsByExtensionType.stream()
+                .map(extension -> new FixedExtensionResponse(extension.getName(), extension.isBlocked()))
                 .toList();
     }
 
+    @Transactional
     public FixedExtensionResponse updateFixedExtension(FixedExtensionUpdateRequest request) {
-        if (!fixedExtensions.containsKey(request.getExtension())) {
-            throw new ExtensionNotFoundException(String.format(ErrorMessages.EXTENSION_NOT_FOUND, request.getExtension()));
+        if (request.getExtension() == null) {
+            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, "null"));
         }
-        fixedExtensions.put(request.getExtension(), request.isBlock());
-        return FixedExtensionResponse.builder()
-                .extension(request.getExtension())
-                .blocked(request.isBlock())
-                .build();
+        String extensionLowerCase = request.getExtension().toLowerCase();
+        Extension extension = febRepository.getExtensionByName(extensionLowerCase)
+                .orElseThrow(() -> new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, request.getExtension())));
+        if (ExtensionType.FIXED != extension.getExtensionType()) {
+            throw new NotFixedException(String.format(ErrorMessages.NOT_FIXED, request.getExtension()));
+        }
+        extension.block(request.isBlock());
+        return new FixedExtensionResponse(extension.getName(), extension.isBlocked());
     }
 
     public List<CustomExtensionResponse> getCustomExtensions() {
-        return customExtensions.stream().map(CustomExtensionResponse::new).toList();
+        List<Extension> extensionsByExtensionType = febRepository.getExtensionsByExtensionType(ExtensionType.CUSTOM);
+        return extensionsByExtensionType.stream().map(extension -> new CustomExtensionResponse(extension.getName())).toList();
     }
 
     public CustomExtensionResponse addCustomExtension(CustomExtensionCreateRequest request) {
-        String extension = request.getExtension();
-        if (extension == null || extension.isBlank() || extension.length() > 20) {
-            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, extension));
+        if (request.getExtension() == null) {
+            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, "null"));
         }
-        String extensionLowerCase = extension.toLowerCase();
-        if (fixedExtensions.containsKey(extensionLowerCase)) {
-            throw new ExtensionAlreadyInFixedException(String.format(ErrorMessages.EXTENSION_ALREADY_IN_FIXED, extension));
-        } else if (customExtensions.contains(extensionLowerCase)) {
-            throw new AlreadyBlockedException(String.format(ErrorMessages.ALREADY_BLOCKED, extension));
+        String extensionLowerCase = request.getExtension().toLowerCase();
+        if (extensionLowerCase.isBlank() || extensionLowerCase.length() > 20) {
+            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, request.getExtension()));
         }
-        customExtensions.add(extensionLowerCase);
-        return new CustomExtensionResponse(extensionLowerCase);
+        Optional<Extension> extensionByName = febRepository.getExtensionByName(extensionLowerCase);
+        if (extensionByName.isPresent()) {
+            if (ExtensionType.FIXED == extensionByName.get().getExtensionType()) {
+                throw new ExtensionAlreadyInFixedException(String.format(ErrorMessages.EXTENSION_ALREADY_IN_FIXED, request.getExtension()));
+            } else {
+                throw new AlreadyBlockedException(String.format(ErrorMessages.ALREADY_BLOCKED, request.getExtension()));
+            }
+        }
+        Extension extension = new Extension(extensionLowerCase, ExtensionType.CUSTOM, true);
+        Extension save = febRepository.save(extension);
+        return new CustomExtensionResponse(save.getName());
     }
 
     public void removeCustomExtension(CustomExtensionDeleteRequest request) {
-        String extensionLowerCase = request.getExtension().toLowerCase();
-        if (!customExtensions.contains(extensionLowerCase)) {
-            throw new ExtensionNotFoundException(String.format(ErrorMessages.EXTENSION_NOT_FOUND, request.getExtension()));
+        if (request.getExtension() == null) {
+            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, "null"));
         }
-        customExtensions.remove(extensionLowerCase);
+        String extensionLowerCase = request.getExtension().toLowerCase();
+        Extension extension = febRepository.getExtensionByName(extensionLowerCase)
+                .orElseThrow(() -> new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, request.getExtension())));
+        if (ExtensionType.FIXED == extension.getExtensionType()) {
+            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, request.getExtension()));
+        }
+        febRepository.delete(extension);
     }
 
 }

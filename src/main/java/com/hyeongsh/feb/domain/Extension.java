@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class Extension {
 
     @Id
-    private String extension;
+    private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "extension_type", nullable = false)
@@ -24,18 +24,14 @@ public class Extension {
     private boolean blocked;
 
     @Builder
-    public Extension(String extension, ExtensionType extensionType, boolean blocked) {
-        this.extension = extension;
+    public Extension(String name, ExtensionType extensionType, boolean blocked) {
+        this.name = name;
         this.extensionType = extensionType;
         this.blocked = blocked;
     }
 
-    public void block() {
-        blocked = true;
-    }
-
-    public void unBlock() {
-        blocked = false;
+    public void block(boolean block) {
+        blocked = block;
     }
 
 }

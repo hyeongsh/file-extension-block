@@ -1,24 +1,42 @@
 package com.hyeongsh.feb.service;
 
+import com.hyeongsh.feb.domain.Extension;
 import com.hyeongsh.feb.dto.*;
+import com.hyeongsh.feb.enums.ExtensionType;
 import com.hyeongsh.feb.exception.AlreadyBlockedException;
 import com.hyeongsh.feb.exception.ExtensionAlreadyInFixedException;
-import com.hyeongsh.feb.exception.ExtensionNotFoundException;
 import com.hyeongsh.feb.exception.InvalidExtensionException;
+import com.hyeongsh.feb.repository.FebRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class FebServiceTest {
+
+    @Autowired
+    private FebService febService;
+
+    @Autowired
+    private FebRepository febRepository;
+
+    @BeforeEach
+    void beforeEach() {
+        febRepository.deleteAll();
+        febRepository.save(new Extension("bat", ExtensionType.FIXED, false));
+        febRepository.save(new Extension("cmd", ExtensionType.FIXED, false));
+        febRepository.save(new Extension("com", ExtensionType.FIXED, false));
+        febRepository.save(new Extension("cpl", ExtensionType.FIXED, false));
+        febRepository.save(new Extension("exe", ExtensionType.FIXED, false));
+        febRepository.save(new Extension("scr", ExtensionType.FIXED, false));
+        febRepository.save(new Extension("js", ExtensionType.FIXED, false));
+    }
 
     @Test
     void updateFixedExtension() {
-        FebService febService = new FebService();
         FixedExtensionUpdateRequest fixedExtensionPatchRequest = FixedExtensionUpdateRequest.builder()
                 .extension("com")
                 .block(true)
@@ -27,12 +45,11 @@ class FebServiceTest {
         assertEquals(true, fixedExtensionResponse.getBlocked());
         fixedExtensionPatchRequest.setExtension("abc");
         // 고정 확장자가 아닌 확장자 변경할 경우 예외 발생
-        assertThrows(ExtensionNotFoundException.class, () -> febService.updateFixedExtension(fixedExtensionPatchRequest));
+        assertThrows(InvalidExtensionException.class, () -> febService.updateFixedExtension(fixedExtensionPatchRequest));
     }
 
     @Test
     void addCustomExtension_failTest() {
-        FebService febService = new FebService();
         CustomExtensionCreateRequest customExtensionCreateRequest1 = new CustomExtensionCreateRequest("");
         CustomExtensionCreateRequest customExtensionCreateRequest2 = new CustomExtensionCreateRequest("com");
         CustomExtensionCreateRequest customExtensionCreateRequest3 = new CustomExtensionCreateRequest("ajksjdkdlsjsksldjafkdalfdajfdask");
@@ -52,7 +69,6 @@ class FebServiceTest {
 
     @Test
     void removeCustomExtension() {
-        FebService febService = new FebService();
         CustomExtensionCreateRequest customExtensionCreateRequest1 = new CustomExtensionCreateRequest("ab");
         CustomExtensionCreateRequest customExtensionCreateRequest2 = new CustomExtensionCreateRequest("abc");
         CustomExtensionCreateRequest customExtensionCreateRequest3 = new CustomExtensionCreateRequest("abcd");
@@ -66,6 +82,6 @@ class FebServiceTest {
         febService.removeCustomExtension(customExtensionDeleteRequest1);
         assertEquals(2, febService.getCustomExtensions().size());
         // 존재하지 않는 확장자 삭제할 경우 예외 발생
-        assertThrows(ExtensionNotFoundException.class, () -> febService.removeCustomExtension(customExtensionDeleteRequest2));
+        assertThrows(InvalidExtensionException.class, () -> febService.removeCustomExtension(customExtensionDeleteRequest2));
     }
 }
