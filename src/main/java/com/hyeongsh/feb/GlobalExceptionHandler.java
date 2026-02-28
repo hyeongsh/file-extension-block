@@ -1,5 +1,6 @@
 package com.hyeongsh.feb;
 
+import com.hyeongsh.feb.dto.ErrorResponse;
 import com.hyeongsh.feb.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,27 +14,27 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleAlreadyBlocked(AlreadyBlockedException e) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(e.getMessage());
+                .body(new ErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler(ExtensionAlreadyInFixedException.class)
     public ResponseEntity<?> handleExtensionAlreadyInFixed(ExtensionAlreadyInFixedException e) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(e.getMessage());
+                .body(new ErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler(InvalidExtensionException.class)
     public ResponseEntity<?> handleInvalidExtension(InvalidExtensionException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(e.getMessage());
+                .body(new ErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler(NotFixedException.class)
     public ResponseEntity<?> handleNotFixed(NotFixedException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(e.getMessage());
+                .body(new ErrorResponse(e.getMessage()));
     }
 }

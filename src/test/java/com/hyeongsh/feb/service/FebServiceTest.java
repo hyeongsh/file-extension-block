@@ -73,15 +73,15 @@ class FebServiceTest {
         CustomExtensionCreateRequest customExtensionCreateRequest2 = new CustomExtensionCreateRequest("abc");
         CustomExtensionCreateRequest customExtensionCreateRequest3 = new CustomExtensionCreateRequest("abcd");
 
-        CustomExtensionDeleteRequest customExtensionDeleteRequest1 = new CustomExtensionDeleteRequest("abcd");
-        CustomExtensionDeleteRequest customExtensionDeleteRequest2 = new CustomExtensionDeleteRequest("abcde");
+        String deleteString1 = "abcd";
+        String deleteString2 = "abcde";
         febService.addCustomExtension(customExtensionCreateRequest1);
         febService.addCustomExtension(customExtensionCreateRequest2);
         febService.addCustomExtension(customExtensionCreateRequest3);
 
-        febService.removeCustomExtension(customExtensionDeleteRequest1);
+        febService.removeCustomExtension(deleteString1);
         assertEquals(2, febService.getCustomExtensions().size());
         // 존재하지 않는 확장자 삭제할 경우 예외 발생
-        assertThrows(InvalidExtensionException.class, () -> febService.removeCustomExtension(customExtensionDeleteRequest2));
+        assertThrows(InvalidExtensionException.class, () -> febService.removeCustomExtension(deleteString2));
     }
 }

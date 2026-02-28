@@ -65,15 +65,15 @@ public class FebService {
         return new CustomExtensionResponse(save.getName());
     }
 
-    public void removeCustomExtension(CustomExtensionDeleteRequest request) {
-        if (request.getExtension() == null) {
+    public void removeCustomExtension(String extensionName) {
+        if (extensionName == null) {
             throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, "null"));
         }
-        String extensionLowerCase = request.getExtension().toLowerCase();
+        String extensionLowerCase = extensionName.toLowerCase();
         Extension extension = febRepository.getExtensionByName(extensionLowerCase)
-                .orElseThrow(() -> new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, request.getExtension())));
+                .orElseThrow(() -> new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, extensionName)));
         if (ExtensionType.FIXED == extension.getExtensionType()) {
-            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, request.getExtension()));
+            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, extensionName));
         }
         febRepository.delete(extension);
     }

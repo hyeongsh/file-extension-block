@@ -36,8 +36,8 @@ public class FebController {
     }
 
     @DeleteMapping("/custom")
-    public ResponseEntity<?> deleteCustomExtension(@RequestBody CustomExtensionDeleteRequest request) {
-        febService.removeCustomExtension(request);
+    public ResponseEntity<?> deleteCustomExtension(@RequestParam("extension") String extension) {
+        febService.removeCustomExtension(extension);
         return ResponseEntity.noContent().build();
     }
 }

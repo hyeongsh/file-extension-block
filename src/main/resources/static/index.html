@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style.css">
+        <title>파일 확장자 차단</title>
+    </head>
+    <body>
+        <h1>파일 확장자 차단</h1>
+        <p>파일확장자에 따라 특정 형식의 파일을 첨부하거나 전송하지 못하도록 제한</p>
+        <p>
+            고정 확장자
+            <input type="checkbox" id="check1" name="fixed" value="bat">
+            <label for="check1">bat</label>
+            <input type="checkbox" id="check2" name="fixed" value="cmd">
+            <label for="check2">cmd</label>
+            <input type="checkbox" id="check3" name="fixed" value="com">
+            <label for="check3">com</label>
+            <input type="checkbox" id="check4" name="fixed" value="cpl">
+            <label for="check4">cpl</label>
+            <input type="checkbox" id="check5" name="fixed" value="exe">
+            <label for="check5">exe</label>
+            <input type="checkbox" id="check6" name="fixed" value="scr">
+            <label for="check6">scr</label>
+            <input type="checkbox" id="check7" name="fixed" value="js">
+            <label for="check7">js</label>
+        </p>
+        <div>
+            <label for="custom-input">커스텀 확장자</label>
+            <input type="text" id="custom-input" placeholder="확장자 입력">
+            <button type="submit" id="custom-btn">+추가</button>
+        </div>
+        <div class="custom-list-container">
+            <div class="list-header">
+                <span id="current-count">0</span> / 200
+            </div>
+
+            <ul id="item-list" class="item-list">
+                <li>
+                    sh
+                    <button class="delete-btn" onclick="deleteCustom(this, 'sh')">X</button>
+                </li>
+            </ul>
+        </div>
+
+        <script src="fixed.js"></script>
+        <script src="custom.js"></script>
+    </body>
+</html>
