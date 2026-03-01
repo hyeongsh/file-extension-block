@@ -51,6 +51,9 @@ public class FebService {
                 throw new AlreadyBlockedException(String.format(ErrorMessages.ALREADY_BLOCKED, request.getExtension()));
             }
         }
+        if (febRepository.getExtensionsByExtensionType(ExtensionType.CUSTOM).size() == 200) {
+            throw new LimitExceedException(ErrorMessages.LIMIT_EXCEED);
+        }
         Extension extension = new Extension(extensionLowerCase, ExtensionType.CUSTOM, true);
         Extension save = febRepository.save(extension);
         return new CustomExtensionResponse(save.getName());

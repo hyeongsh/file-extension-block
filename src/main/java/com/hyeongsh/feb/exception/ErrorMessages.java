@@ -8,4 +8,5 @@ public class ErrorMessages {
     public static final String INVALID_EXTENSION =  "Invalid extension. extension:%s";
     public static final String ALREADY_BLOCKED =  "Already blocked. extension:%s";
     public static final String NOT_FIXED =  "Extension is not fixed. extension:%s";
+    public static final String LIMIT_EXCEED =  "Only up to 200 extension can be blocked.";
 }
