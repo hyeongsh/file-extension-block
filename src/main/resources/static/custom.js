@@ -14,7 +14,7 @@ addBtn.addEventListener('click', () => {
         return;
     }
 
-    fetch('http://localhost:8080/custom', {
+    fetch('/custom', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ extension: value })
@@ -37,7 +37,7 @@ input.addEventListener('keypress', (e) => {
 })
 
 function loadList() {
-    fetch('http://localhost:8080/custom')
+    fetch('/custom')
         .then(response => response.json())
         .then(dataList => {
             const listUl = document.querySelector('#item-list');
@@ -60,7 +60,7 @@ function loadList() {
 }
 
 function deleteItem(buttonElement, extensionName) {
-    fetch(`http://localhost:8080/custom?extension=${extensionName}`, {
+    fetch(`/custom?extension=${extensionName}`, {
         method: 'DELETE'
     })
         .then(response => {

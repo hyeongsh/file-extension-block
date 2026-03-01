@@ -1,5 +1,5 @@
 window.addEventListener('DOMContentLoaded', () => {
-    fetch('http://localhost:8080/fixed')
+    fetch('/fixed')
         .then(response => response.json())
         .then(dataList => {
             dataList.forEach(item => {
@@ -22,7 +22,7 @@ checkboxes.forEach((checkbox) => {
             block: event.target.checked
         };
 
-        fetch('http://localhost:8080/fixed', {
+        fetch('/fixed', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
