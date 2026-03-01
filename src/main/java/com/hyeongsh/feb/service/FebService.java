@@ -26,10 +26,7 @@ public class FebService {
 
     @Transactional
     public FixedExtensionResponse updateFixedExtension(FixedExtensionUpdateRequest request) {
-        if (request.getExtension() == null) {
-            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, "null"));
-        }
-        String extensionLowerCase = request.getExtension().toLowerCase();
+        String extensionLowerCase = extensionToLowerCase(request.getExtension());
         Extension extension = febRepository.getExtensionByName(extensionLowerCase)
                 .orElseThrow(() -> new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, request.getExtension())));
         if (ExtensionType.FIXED != extension.getExtensionType()) {
@@ -45,13 +42,7 @@ public class FebService {
     }
 
     public CustomExtensionResponse addCustomExtension(CustomExtensionCreateRequest request) {
-        if (request.getExtension() == null) {
-            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, "null"));
-        }
-        String extensionLowerCase = request.getExtension().toLowerCase();
-        if (extensionLowerCase.isBlank() || extensionLowerCase.length() > 20) {
-            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, request.getExtension()));
-        }
+        String extensionLowerCase = extensionToLowerCase(request.getExtension());
         Optional<Extension> extensionByName = febRepository.getExtensionByName(extensionLowerCase);
         if (extensionByName.isPresent()) {
             if (ExtensionType.FIXED == extensionByName.get().getExtensionType()) {
@@ -66,10 +57,7 @@ public class FebService {
     }
 
     public void removeCustomExtension(String extensionName) {
-        if (extensionName == null) {
-            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, "null"));
-        }
-        String extensionLowerCase = extensionName.toLowerCase();
+        String extensionLowerCase = extensionToLowerCase(extensionName);
         Extension extension = febRepository.getExtensionByName(extensionLowerCase)
                 .orElseThrow(() -> new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, extensionName)));
         if (ExtensionType.FIXED == extension.getExtensionType()) {
@@ -78,4 +66,17 @@ public class FebService {
         febRepository.delete(extension);
     }
 
+    private String extensionToLowerCase(String name) {
+        if (name == null) {
+            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, "null"));
+        } else if (name.isBlank() || name.length() > 20) {
+            throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, name));
+        }
+        for (char c : name.toCharArray()) {
+            if (!Character.isDigit(c) && !Character.isAlphabetic(c)) {
+                throw new InvalidExtensionException(String.format(ErrorMessages.INVALID_EXTENSION, name));
+            }
+        }
+        return name.toLowerCase();
+    }
 }
