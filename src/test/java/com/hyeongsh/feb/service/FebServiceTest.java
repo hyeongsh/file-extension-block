@@ -6,6 +6,7 @@ import com.hyeongsh.feb.enums.ExtensionType;
 import com.hyeongsh.feb.exception.AlreadyBlockedException;
 import com.hyeongsh.feb.exception.ExtensionAlreadyInFixedException;
 import com.hyeongsh.feb.exception.InvalidExtensionException;
+import com.hyeongsh.feb.exception.LimitExceedException;
 import com.hyeongsh.feb.repository.FebRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,6 +66,14 @@ class FebServiceTest {
         febService.addCustomExtension(customExtensionCreateRequest4);
         // 같은 값 추가할 경우 예외 발생 (대문자 포함)
         assertThrows(AlreadyBlockedException.class, () -> febService.addCustomExtension(customExtensionCreateRequest5));
+    }
+
+    @Test
+    void addCustomExtension_exceedTest() {
+        for (int i = 1; i <= 200; i++) {
+            febService.addCustomExtension(new CustomExtensionCreateRequest(String.valueOf(i)));
+        }
+        assertThrows(LimitExceedException.class, () -> febService.addCustomExtension(new CustomExtensionCreateRequest(String.valueOf(201))));
     }
 
     @Test
